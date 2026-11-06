@@ -19,6 +19,7 @@ from app.schemas import (
     AlocacaoIn, AlocacaoUpdate, CustoExtraIn, EquipeDeModeloIn, EquipeIn, EquipeOut, EventoIn, EventoOut,
     EventoStatusIn, MaterialEventoIn, MoverIn, ResumoCustosOut, RetirarIn,
 )
+from app.services import geo
 from app.services.alocacoes import (
     alocacao_dict, carregar_evento, checar_conflito, eh_escritorio, eventos_do_lider, exigir_escritorio,
     exigir_ver_evento, resumo_equipes,
@@ -92,6 +93,11 @@ def _normalizar(payload: EventoIn) -> dict:
     for k in ("inicio", "fim", "evento_inicio", "evento_fim"):
         dados[k] = sem_fuso(dados[k])
     dados["numero_projeto"] = (dados.get("numero_projeto") or "").strip() or None
+    # Sem ponto marcado no mapa: localiza pelo endereço (ou centro da cidade) para o evento aparecer no mapa.
+    if dados.get("latitude") is None or dados.get("longitude") is None:
+        pos = geo.localizar(dados.get("endereco"), dados.get("cidade"), dados.get("uf"))
+        if pos:
+            dados["latitude"], dados["longitude"] = pos
     return dados
 
 

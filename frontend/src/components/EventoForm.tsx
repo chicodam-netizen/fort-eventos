@@ -40,7 +40,10 @@ export default function EventoForm({ evento, onClose, onSalvo }: { evento?: Even
     setErro('')
     setBuscando(true)
     try {
-      setResultados(await apiGeo(q))
+      const r = await apiGeo(q)
+      // Um único resultado: já marca no mapa; com vários, o usuário escolhe na lista.
+      if (r.length === 1) escolher(r[0])
+      else setResultados(r)
     } catch (e) {
       setErro(erroMsg(e))
     } finally {
@@ -132,6 +135,7 @@ export default function EventoForm({ evento, onClose, onSalvo }: { evento?: Even
       {resultados && (
         <div className="card" style={{ padding: 8 }}>
           {resultados.length === 0 && <div className="muted small" style={{ padding: 8 }}>Nada encontrado. Tente outro termo ou clique no mapa.</div>}
+          {resultados.length > 1 && <div className="small" style={{ padding: '4px 8px', fontWeight: 600 }}>Clique no local correto para marcar no mapa:</div>}
           {resultados.map((r, i) => (
             <button key={i} className="btn ghost" style={{ width: '100%', justifyContent: 'flex-start', whiteSpace: 'normal', textAlign: 'left', fontWeight: 500, minHeight: 40 }} onClick={() => escolher(r)}>
               <MapPin size={15} style={{ flexShrink: 0 }} />{r.descricao}
@@ -147,7 +151,9 @@ export default function EventoForm({ evento, onClose, onSalvo }: { evento?: Even
       />
       <div className="small muted">
         Clique no mapa ou arraste o marcador para ajustar o ponto exato (útil em áreas sem endereço formal).
-        {f.latitude && <span className="num"> · {f.latitude}, {f.longitude}</span>}
+        {f.latitude
+          ? <span className="num"> · {f.latitude}, {f.longitude}</span>
+          : <span style={{ color: '#C43600', fontWeight: 600 }}> · Ponto ainda não marcado: ao salvar, o sistema localiza pelo endereço/cidade.</span>}
       </div>
 
       <h3>Orçamento previsto</h3>

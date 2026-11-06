@@ -1,16 +1,13 @@
 """Painel inicial e geocodificação de endereços."""
-import json
-import urllib.parse
-import urllib.request
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.auth import get_current_usuario
-from app.config import settings
 from app.database import get_db
 from app.models import Alocacao, Equipe, Evento, MaterialEvento, Usuario
+from app.services import geo
 from app.services.alocacoes import eh_escritorio, eventos_do_lider, resumo_equipes
 from app.services.custos import custo_material, custos_alocacoes
 from app.services.tempo import agora
@@ -80,32 +77,11 @@ def painel(db: Session = Depends(get_db), usuario: Usuario = Depends(get_current
     }
 
 
-# ─── Geocodificação (OpenStreetMap / Nominatim) ──────────────────────────────
-# Política de uso do Nominatim: identificar a aplicação no User-Agent e no máximo
-# 1 requisição por segundo. A busca é disparada manualmente pelo usuário (botão),
-# então o volume é baixo.
-
-def _nominatim(caminho: str, params: dict) -> list | dict:
-    url = f"https://nominatim.openstreetmap.org/{caminho}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": settings.GEOCODER_USER_AGENT, "Accept-Language": "pt-BR"})
-    try:
-        with urllib.request.urlopen(req, timeout=10) as r:
-            return json.loads(r.read().decode("utf-8"))
-    except Exception:
-        raise HTTPException(status_code=502, detail="Serviço de mapas indisponível no momento. Marque o ponto no mapa manualmente.")
-
+# ─── Geocodificação (OpenStreetMap / Nominatim) — regras em services/geo.py ──
 
 @router.get("/geo/buscar")
 def geo_buscar(q: str = Query(..., min_length=3), _: Usuario = Depends(get_current_usuario)):
-    dados = _nominatim("search", {"q": q, "format": "jsonv2", "addressdetails": 1, "limit": 5, "countrycodes": "br"})
-    resultado = []
-    for d in dados:
-        end = d.get("address", {})
-        uf = (end.get("ISO3166-2-lvl4") or "").replace("BR-", "") or None
-        resultado.append({
-            "descricao": d.get("display_name"),
-            "latitude": float(d["lat"]), "longitude": float(d["lon"]),
-            "cidade": end.get("city") or end.get("town") or end.get("village") or end.get("municipality"),
-            "uf": uf,
-        })
-    return resultado
+    try:
+        return geo.buscar(q)
+    except Exception:
+        raise HTTPException(status_code=502, detail="Serviço de mapas indisponível no momento. Marque o ponto no mapa manualmente.")

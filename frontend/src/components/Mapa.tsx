@@ -1,7 +1,8 @@
 import { useEffect, useMemo } from 'react'
 import L from 'leaflet'
-import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from 'react-leaflet'
+import { MapContainer, Marker, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet'
 import { Link } from 'react-router-dom'
+import type { EquipeResumo } from '../api'
 import { STATUS_EM_CAMPO, STATUS_HEX, STATUS_ORDEM, periodo } from '../utils/format'
 
 const BRASIL: [number, number] = [-15.8, -50.5]
@@ -32,6 +33,7 @@ export interface PontoEvento {
   latitude?: number | null
   longitude?: number | null
   pessoas_agora?: number
+  equipes_resumo?: EquipeResumo[]
 }
 
 function Enquadrar({ pontos }: { pontos: [number, number][] }) {
@@ -68,6 +70,29 @@ export function MapaEventos({ eventos, className = 'map' }: { eventos: PontoEven
                 )}
               </div>
             </Popup>
+            <Tooltip direction="top" offset={[0, -10]} opacity={1} className="map-tip">
+              <div className="tip-nome">{e.nome}</div>
+              <div className="tip-sub">
+                {e.status} · {periodo(e.inicio, e.fim)}
+                {e.cidade && <> · {e.cidade}{e.uf ? `/${e.uf}` : ''}</>}
+              </div>
+              {e.equipes_resumo && e.equipes_resumo.length > 0 ? (
+                <ul className="tip-equipes">
+                  {e.equipes_resumo.map((q, i) => (
+                    <li key={i}>
+                      <span className="dot" style={{ background: q.cor || '#888' }} />
+                      <b>{q.nome}</b>
+                      <span className="tip-qtd">
+                        {STATUS_EM_CAMPO.includes(e.status) ? `${q.pessoas_agora} agora` : `${q.pessoas_total} pessoas`}
+                      </span>
+                      {q.lider_nome && <div className="tip-lider">Líder: {q.lider_nome}</div>}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="tip-sub">Nenhuma equipe montada</div>
+              )}
+            </Tooltip>
           </Marker>
         ))}
       </MapContainer>

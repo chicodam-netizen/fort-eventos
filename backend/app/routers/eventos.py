@@ -21,7 +21,7 @@ from app.schemas import (
 )
 from app.services.alocacoes import (
     alocacao_dict, carregar_evento, checar_conflito, eh_escritorio, eventos_do_lider, exigir_escritorio,
-    exigir_ver_evento,
+    exigir_ver_evento, resumo_equipes,
 )
 from app.services.custos import custo_material, custos_alocacoes, dias_material
 from app.services.tempo import agora, sem_fuso
@@ -65,6 +65,7 @@ def _evento_out(db: Session, ev: Evento, usuario: Usuario, alocs: Optional[list[
     d["qtd_equipes"] = len(ev.equipes)
     d["pessoas_agora"] = len({a.prestador_id for a in alocs if a.inicio <= ref < a.fim})
     d["pessoas_total"] = len({a.prestador_id for a in alocs})
+    d["equipes_resumo"] = resumo_equipes(ev.equipes, alocs, ref)
     d["pode_editar"] = eh_escritorio(usuario)
     if eh_escritorio(usuario):
         custos = custos_alocacoes(db, alocs)
@@ -114,7 +115,7 @@ def listar_eventos(
     usuario: Usuario = Depends(get_current_usuario),
 ):
     query = db.query(Evento).options(
-        joinedload(Evento.equipes), joinedload(Evento.responsavel),
+        joinedload(Evento.equipes).joinedload(Equipe.lider), joinedload(Evento.responsavel),
         joinedload(Evento.materiais).joinedload(MaterialEvento.material), joinedload(Evento.custos_extras),
     )
     if not eh_escritorio(usuario):

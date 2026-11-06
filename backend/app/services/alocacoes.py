@@ -137,3 +137,17 @@ def carregar_evento(db: Session, evento_id: str) -> Evento:
     if not ev:
         raise HTTPException(status_code=404, detail="Evento não encontrado.")
     return ev
+
+
+def resumo_equipes(equipes, alocs, ref) -> list[dict]:
+    """Resumo por equipe para o mapa: nome, cor, líder e pessoas (agora / no total)."""
+    return [
+        {
+            "nome": e.nome,
+            "cor": e.cor,
+            "lider_nome": e.lider.nome if e.lider else None,
+            "pessoas_agora": len({a.prestador_id for a in alocs if a.equipe_id == e.id and a.inicio <= ref < a.fim}),
+            "pessoas_total": len({a.prestador_id for a in alocs if a.equipe_id == e.id}),
+        }
+        for e in equipes
+    ]

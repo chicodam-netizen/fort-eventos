@@ -145,9 +145,18 @@ export interface Evento {
   pessoas_total: number
   custo_realizado: number
   pode_editar: boolean
+  equipes_resumo: EquipeResumo[]
 }
 
-export type EventoIn = Omit<Evento, 'id' | 'qtd_equipes' | 'pessoas_agora' | 'pessoas_total' | 'custo_realizado' | 'pode_editar' | 'responsavel_nome'>
+export interface EquipeResumo {
+  nome: string
+  cor?: string | null
+  lider_nome?: string | null
+  pessoas_agora: number
+  pessoas_total: number
+}
+
+export type EventoIn = Omit<Evento, 'id' | 'qtd_equipes' | 'pessoas_agora' | 'pessoas_total' | 'custo_realizado' | 'pode_editar' | 'responsavel_nome' | 'equipes_resumo'>
 
 export interface Alocacao {
   id: string

@@ -249,3 +249,12 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
 
 .spinner { width: 28px; height: 28px; border: 3px solid var(--line); border-top-color: var(--brand); border-radius: 50%; animation: spin .8s linear infinite; margin: 40px auto; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* Tooltip do mapa (passar o mouse sobre o evento) */
+.leaflet-tooltip.map-tip { font-family: 'Montserrat', sans-serif; font-size: 12px; padding: 8px 10px; border-radius: 8px; border: 1px solid #e5e5e5; border-top: 3px solid #FF4700; box-shadow: 0 4px 14px rgba(0,0,0,.18); min-width: 200px; max-width: 280px; white-space: normal; }
+.map-tip .tip-nome { font-weight: 700; font-size: 13px; color: #111; }
+.map-tip .tip-sub { color: #5E5E5E; margin-top: 2px; }
+.map-tip .tip-equipes { list-style: none; margin: 6px 0 0; padding: 6px 0 0; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 4px; }
+.map-tip .tip-equipes .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.map-tip .tip-qtd { float: right; color: #5E5E5E; font-family: 'IBM Plex Mono', monospace; font-size: 11px; margin-left: 8px; }
+.map-tip .tip-lider { color: #5E5E5E; font-size: 11px; padding-left: 14px; }

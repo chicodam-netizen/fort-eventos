@@ -198,6 +198,14 @@ class EventoStatusIn(BaseModel):
     status: str
 
 
+class EquipeResumoOut(BaseModel):
+    nome: str
+    cor: Optional[str] = None
+    lider_nome: Optional[str] = None
+    pessoas_agora: int = 0
+    pessoas_total: int = 0
+
+
 class EventoOut(ORM):
     id: str
     numero_projeto: Optional[str] = None
@@ -226,6 +234,7 @@ class EventoOut(ORM):
     pessoas_total: int = 0
     custo_realizado: float = 0
     pode_editar: bool = False
+    equipes_resumo: List[EquipeResumoOut] = []
 
 
 # ─── Equipes do evento / Alocações ───────────────────────────────────────────

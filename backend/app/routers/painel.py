@@ -11,7 +11,7 @@ from app.auth import get_current_usuario
 from app.config import settings
 from app.database import get_db
 from app.models import Alocacao, Equipe, Evento, MaterialEvento, Usuario
-from app.services.alocacoes import eh_escritorio, eventos_do_lider
+from app.services.alocacoes import eh_escritorio, eventos_do_lider, resumo_equipes
 from app.services.custos import custo_material, custos_alocacoes
 from app.services.tempo import agora
 
@@ -25,6 +25,7 @@ def painel(db: Session = Depends(get_db), usuario: Usuario = Depends(get_current
     ref = agora()
     escritorio = eh_escritorio(usuario)
     q = db.query(Evento).options(
+        joinedload(Evento.equipes).joinedload(Equipe.lider),
         joinedload(Evento.materiais).joinedload(MaterialEvento.material), joinedload(Evento.custos_extras),
     )
     if not escritorio:
@@ -59,6 +60,7 @@ def painel(db: Session = Depends(get_db), usuario: Usuario = Depends(get_current
             "inicio": e.inicio, "fim": e.fim, "cidade": e.cidade, "uf": e.uf,
             "latitude": e.latitude, "longitude": e.longitude,
             "pessoas_agora": len(pessoas_agora.get(e.id, set())),
+            "equipes_resumo": resumo_equipes(e.equipes, [a for a in alocs if a.equipe.evento_id == e.id], ref),
             "custo_realizado": round(realizado, 2) if escritorio else 0,
             "custo_previsto": round(previsto, 2) if escritorio else 0,
         })

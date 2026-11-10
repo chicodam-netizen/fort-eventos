@@ -6,7 +6,7 @@ Sistema para o Grupo Forte gerenciar **equipes, prestadores, materiais e custos 
 Derivado do stack do projeto DELLUT, com identidade visual do CRM comercial do Grupo Forte
 (`../COMERCIAL/poc-crm/app/public/style.css`: laranja #FF4700, preto, Montserrat).
 
-**Situação atual:** em preparação para nuvem — GitHub + Vercel (frontend + API) + Neon (Postgres).
+**Situação atual:** em produção (POC) — https://fort-eventos.vercel.app · repo público github.com/chicodam-netizen/fort-eventos · Neon (Postgres, sa-east-1).
 Ver seção "Produção". Fluxo obrigatório: commit local → revisão → push só com aprovação → confirmar deploy.
 
 ## Stack
@@ -46,7 +46,9 @@ banco em nuvem com dados reais, introduzir Alembic antes de qualquer mudança de
 | Banco | Neon Postgres — usar a connection string **pooled** (host com `-pooler`). Em `VERCEL=1` o engine usa `NullPool` (`app/database.py`); `postgres://` é normalizado. |
 | Variáveis na Vercel | `DATABASE_URL`, `JWT_SECRET_KEY` (novo, diferente do local), `APP_NAME`, `FRONTEND_URL` (URL pública), `GEOCODER_USER_AGENT`. |
 | Preparar o banco | `backend/preparar_banco_nuvem.py` — cria tabelas e o 1º admin (lê `DATABASE_URL_NUVEM` ou `backend/.env.producao`, gitignored; recusa localhost; só aditivo). |
-| Seed fictício | **Nunca** em produção (o script já aborta fora de localhost). |
+| Seed fictício | `seed_dados_teste.py` **nunca** em produção (aborta fora de localhost). Os dados ficam em `dados_demo.py` (sem usuários), compartilhado com a POC. |
+| POC em produção | Desde 2026-11-10 o Neon tem os dados de demonstração (sem logins `teste123` — repo público). Os scripts de carga e limpeza da POC ficam **só na máquina local** (gitignored). Limpeza ao fim da POC: mostrar o plano e ter confirmação antes. |
+| Scripts de nuvem | Todos usam `nuvem_util.py` (URL de `DATABASE_URL_NUVEM` ou `backend/.env.producao`; recusa localhost). |
 
 Antes da primeira mudança de schema com dados reais no Neon: introduzir Alembic (baseline do schema atual).
 

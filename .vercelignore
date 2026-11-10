@@ -1,0 +1,5 @@
+backend/.env
+backend/seed_dados_teste.py
+**/__pycache__
+*.log
+frontend/node_modules

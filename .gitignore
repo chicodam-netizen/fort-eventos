@@ -17,3 +17,6 @@ dist/
 # Logs / locais
 *.log
 backups/
+
+# Vercel
+.vercel/

@@ -1,0 +1,11 @@
+# Dependências da função Python na Vercel (api/index.py).
+# Para rodar localmente use backend/requirements.txt (inclui o uvicorn).
+fastapi>=0.115.0
+sqlalchemy>=2.0.35,<2.1.0
+pydantic>=2.11.0
+pydantic-settings>=2.7.0
+psycopg2-binary>=2.9.9
+python-dotenv>=1.0.1
+bcrypt>=4.1.0
+python-jose[cryptography]>=3.3.0
+tzdata>=2024.1

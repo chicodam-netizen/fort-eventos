@@ -6,7 +6,8 @@ Sistema para o Grupo Forte gerenciar **equipes, prestadores, materiais e custos 
 Derivado do stack do projeto DELLUT, com identidade visual do CRM comercial do Grupo Forte
 (`../COMERCIAL/poc-crm/app/public/style.css`: laranja #FF4700, preto, Montserrat).
 
-**Situação atual: somente ambiente local.** O banco em nuvem e o deploy serão definidos depois.
+**Situação atual:** em preparação para nuvem — GitHub + Vercel (frontend + API) + Neon (Postgres).
+Ver seção "Produção". Fluxo obrigatório: commit local → revisão → push só com aprovação → confirmar deploy.
 
 ## Stack
 | Camada | Tecnologia |
@@ -36,6 +37,18 @@ npm run dev        # http://localhost:5174  (proxy /api → 8002)
 
 O schema é criado no startup (`create_tables()`); não há migrações ainda. Quando houver
 banco em nuvem com dados reais, introduzir Alembic antes de qualquer mudança de schema.
+
+## Produção (Vercel + Neon)
+| Item | Como está |
+|---|---|
+| Hospedagem | **Um único projeto Vercel** na raiz do repo: `frontend/dist` estático + a API FastAPI como função Python em `api/index.py` (importa `backend/app`). `vercel.json` reescreve `/api/*` → função e o resto → `index.html`. |
+| Dependências da função | `requirements.txt` da **raiz** (sem uvicorn). Local continua usando `backend/requirements.txt`. Manter as duas listas em sincronia. |
+| Banco | Neon Postgres — usar a connection string **pooled** (host com `-pooler`). Em `VERCEL=1` o engine usa `NullPool` (`app/database.py`); `postgres://` é normalizado. |
+| Variáveis na Vercel | `DATABASE_URL`, `JWT_SECRET_KEY` (novo, diferente do local), `APP_NAME`, `FRONTEND_URL` (URL pública), `GEOCODER_USER_AGENT`. |
+| Preparar o banco | `backend/preparar_banco_nuvem.py` — cria tabelas e o 1º admin (lê `DATABASE_URL_NUVEM` ou `backend/.env.producao`, gitignored; recusa localhost; só aditivo). |
+| Seed fictício | **Nunca** em produção (o script já aborta fora de localhost). |
+
+Antes da primeira mudança de schema com dados reais no Neon: introduzir Alembic (baseline do schema atual).
 
 ## Modelo de domínio (regras que importam)
 - **Evento**: período total da operação (`inicio`/`fim`, montagem → desmontagem) + período aberto
@@ -73,4 +86,4 @@ banco em nuvem com dados reais, introduzir Alembic antes de qualquer mudança de
 ## Próximos passos previstos
 1. Controle de estoque de material próprio entre eventos simultâneos.
 2. Integração com o CRM (proposta fechada → evento com orçamento; `numero_projeto` já existe).
-3. Definir banco em nuvem e deploy (seguir o fluxo commit → revisão → push → confirmação).
+3. Alembic antes de qualquer mudança de schema em produção.

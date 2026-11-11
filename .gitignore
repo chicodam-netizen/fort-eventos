@@ -20,7 +20,3 @@ backups/
 
 # Vercel
 .vercel/
-
-# Scripts da POC em produção — mantidos só localmente (não publicar)
-backend/carregar_poc_nuvem.py
-backend/limpar_poc_nuvem.py
